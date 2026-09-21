@@ -36,7 +36,21 @@ process.stdin.on("end", () => {
   const GENERIC = new Set(["", "general-purpose", "claude"]);
   const TOP_TIER = /(opus|fable)/;
 
-  if (!GENERIC.has(type) || !TOP_TIER.test(model)) process.exit(0);
+  if (!GENERIC.has(type)) process.exit(0);
+
+  // Resolution order: explicit model on the call, else CLAUDE_CODE_SUBAGENT_MODEL,
+  // else the sub-agent inherits the orchestrator's tier. That last case is the
+  // dangerous one and it is invisible from `model` alone: locally the env default
+  // catches it, but a cloud session never reads ~/.claude/settings.json, so there
+  // is no default there and an unset model silently inherits an Opus/Fable
+  // orchestrator. Treat inheritance as top-tier unless something proves otherwise.
+  const envDefault = String(process.env.CLAUDE_CODE_SUBAGENT_MODEL ?? "")
+    .trim()
+    .toLowerCase();
+  const inherits = !model && !envDefault;
+  const effective = model || envDefault;
+
+  if (!inherits && !TOP_TIER.test(effective)) process.exit(0);
   if (/TIER-JUSTIFIED:/i.test(prompt)) process.exit(0);
 
   // The Codex lane only exists where the binary does. A cloud VM has no
@@ -47,7 +61,9 @@ process.stdin.on("end", () => {
   });
 
   const reason = [
-    `Blocked: generic sub-agent on "${ti.model}".`,
+    inherits
+      ? "Blocked: generic sub-agent with no model set, and no CLAUDE_CODE_SUBAGENT_MODEL\ndefault in this environment, so it would inherit the orchestrator's tier."
+      : `Blocked: generic sub-agent on "${effective}".`,
     "",
     "Route it instead:",
     ...(codex
