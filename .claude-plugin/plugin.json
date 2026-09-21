@@ -1,0 +1,14 @@
+{
+  "name": "guardrails",
+  "version": "0.1.0",
+  "description": "Cost-control guardrails for Claude Code: blocks top-tier models on generic sub-agents and injects the delegation/tiering rules into every session. Portable across CLI, Desktop, Cowork and cloud sessions.",
+  "author": {
+    "name": "XGenius"
+  },
+  "keywords": [
+    "cost-control",
+    "subagents",
+    "tiering",
+    "hooks"
+  ]
+}

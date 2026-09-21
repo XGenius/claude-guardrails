@@ -1,0 +1,27 @@
+{
+  "description": "Guardrails: sub-agent tier enforcement + session cost rules",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PATH=\"/opt/node22/bin:/opt/homebrew/bin:/usr/local/bin:$PATH\" node \"${CLAUDE_PLUGIN_ROOT}/hooks/subagent-tier-guard.mjs\""
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PATH=\"/opt/node22/bin:/opt/homebrew/bin:/usr/local/bin:$PATH\" node \"${CLAUDE_PLUGIN_ROOT}/hooks/session-rules.mjs\""
+          }
+        ]
+      }
+    ]
+  }
+}
