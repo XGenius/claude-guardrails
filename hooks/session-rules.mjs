@@ -63,7 +63,7 @@ const rules = [
   "",
   "## Implementation lane",
   hasCodex
-    ? "- A local codex binary is present. Run fully specified implementation with\n  ~/.claude/scripts/codex-run.sh from the orchestrator's own Bash (no Claude\n  supervisor agent) on gpt-6-sol for everything; for a trickier spec raise\n  --effort, not the model. It draws on a separate subscription, which is\n  what keeps the Claude pool alive.\n  If it reports STATUS: unavailable, fall back to model: \"sonnet\" and say so."
+    ? "- A local codex binary is present. Run fully specified implementation with\n  ~/.claude/scripts/codex-run.sh from the orchestrator's own Bash (no Claude\n  supervisor agent): gpt-6-luna at max effort for well-structured, bounded\n  tasks (the default), gpt-6-sol for more complex tasks. It draws on a\n  separate subscription, which is what keeps the Claude pool alive.\n  If it reports STATUS: unavailable, fall back to model: \"sonnet\" and say so."
     : "- No local codex binary in this environment, so the Codex lane is unavailable.\n  Send fully specified implementation to model: \"sonnet\" instead.",
 ].join("\n");
 

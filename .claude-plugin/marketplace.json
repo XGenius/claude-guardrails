@@ -6,14 +6,14 @@
   },
   "metadata": {
     "description": "XGenius shared Claude Code guardrails",
-    "version": "0.2.2"
+    "version": "0.2.3"
   },
   "plugins": [
     {
       "name": "guardrails",
       "source": "./",
       "description": "Cost-control guardrails for Claude Code: blocks top-tier models on generic sub-agents and injects the delegation/tiering rules into every session. Portable across CLI, Desktop, Cowork and cloud sessions.",
-      "version": "0.2.2",
+      "version": "0.2.3",
       "author": {
         "name": "XGenius"
       }
