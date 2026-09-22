@@ -21,8 +21,9 @@ const hasCodex = ["/opt/homebrew/bin/codex", "/usr/local/bin/codex"].some((p) =>
   }
 });
 
-// Measured 2026-09-20 on a Fable-orchestrated workload. A delegation costs two
-// orchestrator turns plus whatever the sub-agent burns, so it is never free.
+// Measured 2026-09-20, re-priced 2026-09-22 for Opus 5.5. Opus 5.5 reads cache
+// at $0.20/MTok, the same as Sonnet 5, and this workload is ~97% cache reads, so
+// an Opus 5.5 call costs ~1.36x a Sonnet call (Opus 5 was ~2.5x, Fable ~2.6x).
 const rules = [
   "# Cost-control guardrails (from the guardrails plugin)",
   "",
@@ -30,25 +31,26 @@ const rules = [
   "- A plugin cannot choose the session model. Locally it comes from",
   "  ~/.claude/settings.json; in a cloud or Cowork session it comes from that",
   "  surface's own model picker, which this plugin never sees.",
-  "- Default the orchestrator to Opus 5. Opus and Fable measured cost-neutral",
-  "  per million context tokens read, so paying the premium tier by default is",
-  "  arbitrary. Choose Fable only for a specific reason.",
-  "- If this session is running on a premium tier without a specific reason,",
-  "  say so once and let the user decide.",
+  "- Default the orchestrator to Opus 5.5 (the `opus` alias). It is cheaper than",
+  "  Fable on every token class. Choose Fable only for a specific reason.",
+  "- If this session is running on Fable, or on a retired Opus (Opus 5, 4.x),",
+  "  without a specific reason, say so once and let the user decide.",
   "",
-  "## Tiering",
-  "- The orchestrator's own tier never licenses it to do the producing. A more",
-  "  expensive orchestrator makes delegation more important, not less.",
-  "- A generic sub-agent (general-purpose, or no subagent_type) may not run on a",
-  "  top-tier model. A PreToolUse hook enforces this and will deny the call.",
-  "- Escalate only after a cheaper tier has actually failed. \"It might be hard\"",
-  "  is not a reason.",
+  "## Routing (per call, relative to Sonnet 5 = 1.00x)",
+  "- Fully specified typing -> the Codex lane (below), not a Claude sub-agent.",
+  "- Judgment-heavy coding (architecture, concurrency, subtle debugging,",
+  "  security) -> model: \"opus\" (Opus 5.5, ~1.36x). Also after ONE failed",
+  "  Sonnet attempt: at 1.36x, Opus pays for itself once Sonnet's redo rate",
+  "  passes roughly 1 in 4.",
+  "- Analysis, tests, routine refactors -> model: \"sonnet\".",
+  "- Renames, boilerplate, format conversion -> model: \"haiku\".",
+  "- Fable (~2.6x) on a generic sub-agent is blocked by a PreToolUse hook unless",
+  "  the prompt carries a TIER-JUSTIFIED: line. Retired Opus pins are blocked.",
+  "- The orchestrator's own tier never licenses it to do the producing.",
   "",
-  "## Delegation break-even (measured, in orchestrator tool calls)",
+  "## Delegation break-even (in orchestrator tool calls)",
   "- Delegation costs 2 orchestrator turns plus the sub-agent's own burn.",
-  "- Delegate a work run longer than ~6 tool calls to a cheap tier.",
-  "- A top-tier sub-agent only pays past ~25 tool calls, so it is nearly always",
-  "  the wrong choice.",
+  "- Delegate a work run longer than ~6 tool calls to a cheaper lane.",
   "- Batch independent tool calls into one turn before reaching for a delegation;",
   "  it is strictly cheaper and needs no round trip.",
   "",
@@ -61,8 +63,8 @@ const rules = [
   "",
   "## Implementation lane",
   hasCodex
-    ? "- A local codex binary is present: send spec-determined implementation to the\n  codex-implementer agent so it draws on a separate subscription."
-    : "- No local codex binary in this environment, so the Codex lane is unavailable.\n  Send spec-determined implementation to sonnet instead.",
+    ? "- A local codex binary is present. Run fully specified implementation with\n  ~/.claude/scripts/codex-run.sh from the orchestrator's own Bash (no Claude\n  supervisor agent): gpt-5.6-terra by default, gpt-6-luna when trickier. It\n  draws on a separate subscription, which is what keeps the Claude pool alive.\n  If it reports STATUS: unavailable, fall back to model: \"sonnet\" and say so."
+    : "- No local codex binary in this environment, so the Codex lane is unavailable.\n  Send fully specified implementation to model: \"sonnet\" instead.",
 ].join("\n");
 
 process.stdout.write(

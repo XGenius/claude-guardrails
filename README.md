@@ -23,7 +23,7 @@ needs a file.
 
 | File | Role |
 |---|---|
-| `hooks/subagent-tier-guard.mjs` | `PreToolUse` on `Agent`. Denies a top-tier model on a generic sub-agent and names the cheaper route. Specialist agents pass untouched. Escape hatch: a `TIER-JUSTIFIED:` line in the prompt. |
+| `hooks/subagent-tier-guard.mjs` | `PreToolUse` on `Agent`. On a generic sub-agent: allows `opus` (Opus 5.5, about 1.36x a Sonnet call since its cache reads cost the same as Sonnet's), denies Fable unless the prompt has a `TIER-JUSTIFIED:` line, denies retired Opus pins (Opus 5, 4.x) outright, and denies silent inheritance where no default sub-agent model exists. Names the cheaper route in every denial. Specialist agents pass untouched. |
 | `hooks/session-rules.mjs` | `SessionStart`. Emits the tiering and delegation rules as `additionalContext`, which is the only mechanism that carries CLAUDE.md-style rules into a cloud session. |
 
 Both detect whether a local `codex` binary exists and adapt their advice, because
@@ -59,12 +59,12 @@ not documented as authenticating from a cloud VM. Do not rely on it untested.
 Not the way your terminal runs it:
 
 ```
-echo '{"tool_name":"Agent","tool_input":{"subagent_type":"general-purpose","model":"opus","prompt":"x"}}' \
+echo '{"tool_name":"Agent","tool_input":{"subagent_type":"general-purpose","model":"fable","prompt":"x"}}' \
   | env -i PATH=/usr/bin:/bin:/usr/sbin:/sbin HOME="$HOME" CLAUDE_PLUGIN_ROOT="$PWD" \
     sh -c 'PATH="/opt/node22/bin:/opt/homebrew/bin:/usr/local/bin:$PATH" node "${CLAUDE_PLUGIN_ROOT}/hooks/subagent-tier-guard.mjs"'
 ```
 
-Expect `permissionDecision: deny`.
+Expect `permissionDecision: deny` for `"model":"fable"` and for `"model":"claude-opus-5"`, and no output (allowed) for `"model":"opus"`.
 
 ## Relationship to the local harness
 
