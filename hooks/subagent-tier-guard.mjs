@@ -82,7 +82,7 @@ process.stdin.on("end", () => {
     "Route it instead:",
     ...(codex
       ? ["  - fully specified implementation -> ~/.claude/scripts/codex-run.sh via Bash",
-         "    (gpt-5.6-terra by default, gpt-6-luna when trickier; uses the ChatGPT",
+         "    (gpt-6-luna by default, gpt-5.6-terra (stronger) when trickier; uses the ChatGPT",
          "    subscription, and costs the Claude pool only the turns that launch it)"]
       : ["  - fully specified implementation -> model: \"sonnet\"",
          "    (no local codex binary here, so the Codex lane is unavailable)"]),
