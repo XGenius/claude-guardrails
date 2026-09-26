@@ -24,7 +24,7 @@ needs a file.
 | File | Role |
 |---|---|
 | `hooks/subagent-tier-guard.mjs` | `PreToolUse` on `Agent`. On a generic sub-agent: allows `opus` (Opus 5.5, about 1.36x a Sonnet call since its cache reads cost the same as Sonnet's), denies Fable unless the prompt has a `TIER-JUSTIFIED:` line, denies retired Opus pins (Opus 5, 4.x) outright, and denies silent inheritance where no default sub-agent model exists. Names the cheaper route in every denial. Specialist agents pass untouched. |
-| `hooks/session-rules.mjs` | `SessionStart`. Emits the tiering and delegation rules as `additionalContext`, which is the only mechanism that carries CLAUDE.md-style rules into a cloud session. |
+| `hooks/session-rules.mjs` | `SessionStart`. Emits the tiering, delegation and shipping rules (merge green PRs and drive to production; never ask the user to merge) as `additionalContext`, which is the only mechanism that carries CLAUDE.md-style rules into a cloud session. |
 
 Both detect whether a local `codex` binary exists and adapt their advice, because
 the Codex lane cannot run in a cloud VM and pointing a cloud session at it would
