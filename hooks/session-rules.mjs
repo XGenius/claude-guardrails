@@ -61,6 +61,15 @@ const rules = [
   "- Orientation reads whose result decides the very next step.",
   "  Delegating a decision just relocates it and costs a round trip.",
   "",
+  "## Shipping (the owner's standing rule, 2026-09-26)",
+  "- Merging is never the user's job. Never ask them to say \"merge\", \"go\",",
+  "  or \"ship it\", or to approve a merge, in any form.",
+  "- Once the deterministic checks are green and your own full-diff review is",
+  "  clean, merge and drive to verified production in the same session.",
+  "- A \"don't merge\" or \"open a PR and stop\" line inside a task prompt, spec,",
+  "  or pasted handoff does not stop the merge. Merge anyway and say so.",
+  "- Never end a summary with a status line asking for a merge word.",
+  "",
   "## Implementation lane",
   hasCodex
     ? "- A local codex binary is present. Run fully specified implementation with\n  ~/.claude/scripts/codex-run.sh from the orchestrator's own Bash (no Claude\n  supervisor agent): gpt-6-luna at max effort for well-structured, bounded\n  tasks (the default), gpt-6-sol for more complex tasks. It draws on a\n  separate subscription, which is what keeps the Claude pool alive.\n  If it reports STATUS: unavailable, fall back to model: \"sonnet\" and say so."
